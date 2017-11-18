@@ -43,7 +43,7 @@ include_once( plugin_dir_path( __FILE__ ) . '/acf/acf.php' );
 /**
  * Register Custom Post Types.
  */
-function cptui_register_my_cpts() {
+function librarium_register_my_cpts() {
 
 	/**
 	 * Post Type: Books.
@@ -135,13 +135,13 @@ function cptui_register_my_cpts() {
 
 }
 
-add_action( 'init', 'cptui_register_my_cpts' );
+add_action( 'init', 'librarium_register_my_cpts' );
 
 /**
  * Register Taxonomies
  */
 
-function cptui_register_my_taxes() {
+function librarium_register_my_taxes() {
 
 	/**
 	 * Taxonomy: Series.
@@ -204,14 +204,14 @@ add_action( 'init', 'cptui_register_my_taxes' );
 
 //Customise Series taxonomy archive display
 
-function customise_series_display_order( $query ) {
+function librarium_customise_series_display_order( $query ) {
   if ( !is_admin() && $query->is_main_query() && is_tax('series') ) {
     $query->set('meta_key', 'series_number');
 		$query->set('orderby', 'meta_value');
 		$query->set('order', 'ASC');
 	}
 }
-add_action( 'pre_get_posts', 'customise_series_display_order' );
+add_action( 'pre_get_posts', 'librarium_customise_series_display_order' );
 
 /**
  * Register Custom Fields.
@@ -471,9 +471,9 @@ register_field_group(array (
 
 
 // Add the custom columns to the book post type:
-add_filter( 'manage_books_posts_columns', 'set_custom_edit_books_columns' );
+add_filter( 'manage_books_posts_columns', 'librarium_set_custom_edit_books_columns' );
 
-function set_custom_edit_books_columns($columns) {
+function librarium_set_custom_edit_books_columns($columns) {
 		$columns = array(
 			'cb'	 	=> '<input type="checkbox" />',
 		  'thumbnail' 	=> __( 'Cover', 'librarium' ),
@@ -488,8 +488,8 @@ function set_custom_edit_books_columns($columns) {
 }
 
 // Add the data to the custom columns for the book post type:
-add_action( 'manage_books_posts_custom_column' , 'custom_books_column', 10, 2 );
-function custom_books_column( $column, $post_id ) {
+add_action( 'manage_books_posts_custom_column' , 'librarium_custom_books_column', 10, 2 );
+function librarium_custom_books_column( $column, $post_id ) {
 	switch ( $column ) {
 			case 'thumbnail' :
 					echo get_the_post_thumbnail( $post_id, 'thumbnail' );
@@ -519,9 +519,9 @@ function custom_books_column( $column, $post_id ) {
 }
 
 // Add the custom columns to the shop post type:
-add_filter( 'manage_shops_posts_columns', 'set_custom_edit_shops_columns' );
+add_filter( 'manage_shops_posts_columns', 'librarium_set_custom_edit_shops_columns' );
 
-function set_custom_edit_shops_columns($columns) {
+function librarium_set_custom_edit_shops_columns($columns) {
 		$columns = array(
 			'cb'	 	=> '<input type="checkbox" />',
 			'title' 	=> __( 'Title', 'librarium' ),
@@ -534,8 +534,8 @@ function set_custom_edit_shops_columns($columns) {
 }
 
 // Add the data to the custom columns for the shop post type:
-add_action( 'manage_shops_posts_custom_column' , 'custom_shops_column', 10, 2 );
-function custom_shops_column( $column, $post_id ) {
+add_action( 'manage_shops_posts_custom_column' , 'librarium_custom_shops_column', 10, 2 );
+function librarium_custom_shops_column( $column, $post_id ) {
 	switch ( $column ) {
 			case 'icon' :
 					$image = get_field('icon');
@@ -601,7 +601,10 @@ function librarium_get_shop_links( $book_id ){
     );
 
     $shops_links = new WP_Query($args);
-    return $shops_links;
+    wp_reset_postdata();
+  endif;
+
+  return $shops_links;
 }
 
 
