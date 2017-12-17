@@ -37,7 +37,9 @@ function my_acf_settings_dir( $dir ) {
 }
 
 
+
 // 3. Include ACF
+define( 'ACF_LITE', true );
 include_once( plugin_dir_path( __FILE__ ) . '/acf/acf.php' );
 
 /**
@@ -199,7 +201,7 @@ function librarium_register_my_taxes() {
 
 }
 
-add_action( 'init', 'cptui_register_my_taxes' );
+add_action( 'init', 'librarium_register_my_taxes' );
 
 
 //Customise Series taxonomy archive display
@@ -314,8 +316,8 @@ if(function_exists("register_field_group"))
 					'class' => '',
 					'id' => '',
 				),
-				'display_format' => 'd/m/Y',
-				'return_format' => 'F j, Y',
+        'date_format' => 'd MM yy',
+				'display_format' => 'd MM yy',
 				'first_day' => 1,
 			),
 			array (
@@ -573,6 +575,36 @@ function librarium_get_book_meta( $book_id ){
    return $book;
 }
 
+// function librarium_show_book_meta_field( $label, $field, $class ){
+//   echo '<div class="book-meta-entry ' . $class . '"><span class="book-meta-label">' . $label . '</span> <span class="book-meta-field">' . $field . '</span></div>';
+// }
+
+function librarium_book_meta_field( $field, $label, $url = null, $class = null ){
+  $content = get_field($field);
+
+  // Standardise URLs NOT to include protocol - http:// included below
+  // Avoids issue with WordPress replacing http:// with http//
+  $url = str_replace(array('http://','https://'), array('',''), $url);
+
+  if ($content):
+    // Format numbers and dates correctly
+    if ( $field == 'book_isbn' | $field == 'ebook_isbn' ) $content = number_format($content,0,'','');
+    if ( $field == 'pub_date'):
+      $date = DateTime::createFromFormat('Ymd', $content);
+      if ($date) $content = $date->format('j F Y');
+    endif;
+
+    echo '<div class="book-meta-entry meta-'.$field.' '.$class.'"><span class="book-meta-label">' . $label . '</span>&nbsp;';
+
+    if ($url) echo '<a href="http://'.$url.'">';
+    echo '<span class="book-meta-field">' . $content . '</span></div>';
+    if ($url) echo '</a>';
+
+  endif;
+
+}
+
+
 function librarium_get_shop_links( $book_id ){
   // get which regions this book is in
   $in_regions = get_the_terms( $book_id, 'regions');
@@ -606,11 +638,3 @@ function librarium_get_shop_links( $book_id ){
 
   return $shops_links;
 }
-
-
-// Hide ACF field group menu item
-add_filter('acf/settings/show_admin', '__return_false');
-function remove_acf(){
-  remove_menu_page( 'edit.php?post_type=acf' );
-}
-add_action( 'admin_menu', 'remove_acf',100 );
