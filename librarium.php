@@ -240,27 +240,21 @@ if(function_exists("register_field_group"))
 				'key' => 'field_595e15baf990e',
 				'label' => 'Print ISBN',
 				'name' => 'book_isbn',
-				'type' => 'number',
+				'type' => 'text',
 				'default_value' => '',
 				'placeholder' => '',
 				'prepend' => '',
 				'append' => '',
-				'min' => 9780000000000,
-				'max' => 9789999999999,
-				'step' => '',
 			),
 			array (
 				'key' => 'field_595e15baf990d',
 				'label' => 'Ebook ISBN',
 				'name' => 'ebook_isbn',
-				'type' => 'number',
+				'type' => 'text',
 				'default_value' => '',
 				'placeholder' => '',
 				'prepend' => '',
 				'append' => '',
-				'min' => 9780000000000,
-				'max' => 9789999999999,
-				'step' => '',
 			),
 			array (
 				'key' => 'field_595e15d8f990f',
@@ -606,15 +600,15 @@ function librarium_book_meta_field( $field, $label, $url = null, $class = null )
 
 
 function librarium_get_shop_links( $book_id ){
-  // get which regions this book is in
-  $in_regions = get_the_terms( $book_id, 'regions');
+  // get which editions this book is in
+  $in_editions = get_the_terms( $book_id, 'editions');
 
-  if (is_array($in_regions) ) :
+  if (is_array($in_editions) ) :
 
     // pull out the edition ids into an array
-    $regions_ids = array();
-    foreach ( $in_regions as $edition) {
-       $regions_ids[] = $edition->term_id;
+    $editions_ids = array();
+    foreach ( $in_editions as $edition) {
+       $editions_ids[] = $edition->term_id;
     }
 
     // get shops that match the book edition, sorted by format
@@ -622,9 +616,9 @@ function librarium_get_shop_links( $book_id ){
      'post_type' => 'shops',
      'tax_query' => array(
          array (
-             'taxonomy' => 'regions',
+             'taxonomy' => 'editions',
              'field' => 'term_id',
-             'terms' => $regions_ids,
+             'terms' => $editions_ids,
          )
      ),
      'meta_key' => 'format',
