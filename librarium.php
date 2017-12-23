@@ -85,7 +85,7 @@ function librarium_register_my_cpts() {
 		"public" => true,
 		"publicly_queryable" => true,
 		"show_ui" => true,
-		"show_in_rest" => false,
+		"show_in_rest" => true,
 		"rest_base" => "",
 		"has_archive" => true,
 		"show_in_menu" => true,
@@ -118,7 +118,7 @@ function librarium_register_my_cpts() {
 		"public" => false,
 		"publicly_queryable" => false,
 		"show_ui" => true,
-		"show_in_rest" => false,
+		"show_in_rest" => true,
 		"rest_base" => "",
 		"has_archive" => false,
 		"show_in_menu" => true,
@@ -627,8 +627,90 @@ function librarium_get_shop_links( $book_id ){
     );
 
     $shops_links = new WP_Query($args);
-    wp_reset_postdata();
   endif;
 
   return $shops_links;
 }
+
+
+function librarium_get_related_books( $book_id, $title = 'Related Books') {
+  $related_books = get_field('book_related_titles', $book_id);
+  if ($related_books):
+    echo '<div class="books-list books-list-related"><h2>'.esc_html( $title ).'</h2>';
+    echo '<div class="books-list-inner">';
+    foreach( $related_books as $book ):
+       echo '<div class="books-list-item">';
+         if ( has_post_thumbnail($book->ID) ) :
+           echo '<a href="'. get_the_permalink($book->ID) .'" title="'. get_the_title($book->ID) .'">';
+           echo get_the_post_thumbnail($book->ID, 'featured_medium');
+           echo '</a>';
+       endif;
+       echo '</div><!-- .books-slider-item -->';
+     endforeach;
+     echo '</div><!-- .books-list-inner -->';
+     echo '</div><!-- .books-list-->';
+  endif;
+
+}
+
+function librarium_get_books_in_series( $book_id, $title = 'In the same series') {
+
+  // get which series this book is in
+  $in_series = get_the_terms( $book_id, 'series');
+
+  if ($in_series):
+    // pull out the series ids into an array
+    $series_ids = array();
+    foreach ( $in_series as $series) {
+        $series_ids[] = $series->term_id;
+    }
+
+    // get books in the same series, sorted by series number, excluding current book
+    $args = array(
+      'post_type' => 'books',
+      'tax_query' => array(
+          array (
+              'taxonomy' => 'series',
+              'field' => 'term_id',
+              'terms' => $series_ids,
+          )
+      ),
+      'meta_key' => 'series_number',
+      'orderby'	 => 'meta_value_num',
+      'order'		=> 'ASC',
+      'post__not_in' => array( $book_id ),
+    );
+
+    $also_in_series = new WP_Query($args);
+
+    if ($also_in_series->have_posts()) :
+      echo '<div class="books-list books-list-series"><h2>'.esc_html( $title ).'</h2>';
+      echo '<div class="books-list-inner">';
+      while ( $also_in_series->have_posts() ) : $also_in_series->the_post();
+         echo '<div class="books-list-item">';
+           if ( has_post_thumbnail()) :
+             echo '<a href="'. get_the_permalink() .'" title="'. get_the_title() .'">';
+             the_post_thumbnail('featured_medium');
+             echo '</a>';
+         endif;
+         echo '</div><!-- .books-slider-item -->';
+       endwhile;
+       echo '</div><!-- .books-list-inner -->';
+       echo '</div><!-- .books-list-->';
+    endif;
+    wp_reset_postdata();
+  endif;
+}
+
+
+// Shortcodes
+
+function review_func( $atts, $content = "" ) {
+	return "<blockquote class='review'>" . do_shortcode($content) . "</blockquote>";
+}
+add_shortcode( 'review', 'review_func' );
+
+function cite_func( $atts, $content = "" ) {
+	return "<cite>$content</cite>";
+}
+add_shortcode( 'cite', 'cite_func' );
