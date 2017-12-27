@@ -633,19 +633,19 @@ function librarium_get_shop_links( $book_id ){
 }
 
 
-function librarium_get_related_books( $book_id, $title = 'Related Books') {
+function librarium_get_related_books( $book_id, $title = 'Related') {
   $related_books = get_field('book_related_titles', $book_id);
   if ($related_books):
     echo '<div class="books-list books-list-related"><h2>'.esc_html( $title ).'</h2>';
     echo '<div class="books-list-inner">';
     foreach( $related_books as $book ):
-       echo '<div class="books-list-item">';
-         if ( has_post_thumbnail($book->ID) ) :
-           echo '<a href="'. get_the_permalink($book->ID) .'" title="'. get_the_title($book->ID) .'">';
-           echo get_the_post_thumbnail($book->ID, 'featured_medium');
-           echo '</a>';
+       if ( has_post_thumbnail($book->ID) ) :
+         echo '<div class="books-list-item">';
+         echo '<a href="'. get_the_permalink($book->ID) .'" title="'. get_the_title($book->ID) .'">';
+         echo get_the_post_thumbnail($book->ID, 'featured_medium');
+         echo '</a>';
+         echo '</div><!-- .books-slider-item -->';
        endif;
-       echo '</div><!-- .books-slider-item -->';
      endforeach;
      echo '</div><!-- .books-list-inner -->';
      echo '</div><!-- .books-list-->';
