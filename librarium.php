@@ -681,25 +681,57 @@ function librarium_get_books_in_series( $book_id, $title = 'In the same series')
       'post__not_in' => array( $book_id ),
     );
 
-    $also_in_series = new WP_Query($args);
+    $books = new WP_Query($args);
 
-    if ($also_in_series->have_posts()) :
+    if ($books->have_posts()) :
       echo '<div class="books-list books-list-series"><h2>'.esc_html( $title ).'</h2>';
       echo '<div class="books-list-inner">';
-      while ( $also_in_series->have_posts() ) : $also_in_series->the_post();
-         echo '<div class="books-list-item">';
+      while ( $books->have_posts() ) : $books->the_post();
            if ( has_post_thumbnail()) :
+             echo '<div class="books-list-item">';
              echo '<a href="'. get_the_permalink() .'" title="'. get_the_title() .'">';
              the_post_thumbnail('featured_medium');
              echo '</a>';
+            echo '</div><!-- .books-slider-item -->';
          endif;
-         echo '</div><!-- .books-slider-item -->';
        endwhile;
        echo '</div><!-- .books-list-inner -->';
        echo '</div><!-- .books-list-->';
     endif;
     wp_reset_postdata();
   endif;
+}
+
+function librarium_get_all_books( $title = 'My books') {
+
+    // get books in the same series, sorted by series number, excluding current book
+    $args = array(
+			'post_type'				=> 'books',
+			'posts_per_page'	=> -1,
+			'meta_key'				=> 'pub_date',
+			'orderby'					=> 'meta_value',
+			'order'						=> 'DESC',
+    );
+
+    $books = new WP_Query($args);
+
+    if ($books->have_posts()) :
+      echo '<div class="books-list books-list-series"><h1>'.esc_html( $title ).'</h1>';
+      echo '<div class="books-list-inner">';
+      while ( $books->have_posts() ) : $books->the_post();
+           if ( has_post_thumbnail()) :
+             echo '<div class="books-list-item">';
+             echo '<a href="'. get_the_permalink() .'" title="'. get_the_title() .'">';
+             the_post_thumbnail('featured_medium');
+             echo '</a>';
+             echo '</div><!-- .books-slider-item -->';
+           endif;
+       endwhile;
+       echo '</div><!-- .books-list-inner -->';
+       echo '</div><!-- .books-list-->';
+    endif;
+    wp_reset_postdata();
+
 }
 
 
